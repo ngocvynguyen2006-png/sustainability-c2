@@ -1,0 +1,1931 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sustainability Ch.2 — ICAEW Study Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f4f7f6;
+      color: #1e293b;
+    }
+
+    /* 3D Flashcard Flip */
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+    .transform-style-3d {
+      transform-style: preserve-3d;
+      transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
+    }
+    .backface-hidden {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+
+    /* Smooth fade-in for cards */
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-slide {
+      animation: fadeSlide 0.25s ease-out;
+    }
+
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Top Header & Navigation -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold shadow-sm shrink-0">
+          S2
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold text-slate-800 leading-tight">Sustainability — Chapter 2</h1>
+          <p class="text-xs text-slate-500">The Pillars of Sustainability • ICAEW Question Bank (50 câu)</p>
+        </div>
+      </div>
+
+      <!-- Main Tabs -->
+      <nav class="flex bg-slate-100 p-1 rounded-xl self-start sm:self-auto w-full sm:w-auto">
+        <button id="tab-quiz" onclick="switchTab('quiz')" class="flex-1 sm:flex-none px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-white text-emerald-700 shadow-sm">
+          Trắc nghiệm
+        </button>
+        <button id="tab-flashcards" onclick="switchTab('flashcards')" class="flex-1 sm:flex-none px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-800">
+          Flashcards
+        </button>
+        <button id="tab-review" onclick="switchTab('review')" class="flex-1 sm:flex-none px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-800 relative">
+          Thống kê & Đánh dấu
+          <span id="flag-count-badge" class="hidden ml-1 px-1.5 py-0.5 text-[10px] font-bold bg-amber-500 text-white rounded-full">0</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6">
+
+    <!-- ==================== TAB 1: QUIZ CAROUSEL ==================== -->
+    <section id="view-quiz" class="space-y-5">
+
+      <!-- Mode & Cycle Control Bar -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 mr-1">Chế độ:</span>
+          <div class="inline-flex bg-slate-100 p-1 rounded-xl">
+            <button id="mode-practice" onclick="setQuizMode('practice')" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow-sm">
+              Luyện tập (Hiện đáp án ngay)
+            </button>
+            <button id="mode-exam" onclick="setQuizMode('exam')" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 hover:text-slate-800">
+              Kiểm tra (Nộp bài cuối chu kỳ)
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <span id="cycle-badge" class="px-3 py-1.5 rounded-xl bg-teal-50 text-teal-700 text-xs font-semibold border border-teal-100">
+            Chu kỳ #1 (Đủ 50 câu)
+          </span>
+          <button onclick="startNewCycle(false)" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors">
+            ↻ Xáo trộn chu kỳ mới
+          </button>
+          <button id="btn-submit-exam" onclick="finishCycle()" class="hidden px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-colors">
+            Nộp bài & Chấm điểm
+          </button>
+        </div>
+      </div>
+
+      <!-- Progress Bar & Live Error Rate -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm mb-2">
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="flex items-center gap-1.5">
+              <span class="font-semibold text-slate-700">Tiến độ chu kỳ:</span>
+              <span id="progress-text" class="font-bold text-emerald-700">0/50 câu (0%)</span>
+            </div>
+            <span id="live-error-badge" class="hidden px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-600 text-xs font-bold border border-rose-100">
+              Tỷ lệ sai: 0%
+            </span>
+          </div>
+          <button onclick="toggleNavigator()" class="text-xs font-semibold text-teal-700 hover:text-teal-900 underline underline-offset-2">
+            <span id="nav-toggle-label">Hiện danh sách câu hỏi</span>
+          </button>
+        </div>
+        <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+          <div id="progress-bar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+
+        <!-- Quick Question Grid Navigator -->
+        <div id="question-navigator" class="hidden mt-4 pt-4 border-t border-slate-100">
+          <div class="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 mb-2.5">
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Đúng</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span> Sai</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-teal-500 inline-block"></span> Đã chọn (Thi)</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span> Phân vân</span>
+          </div>
+          <div id="nav-grid" class="grid grid-cols-5 sm:grid-cols-10 gap-1.5"></div>
+        </div>
+      </div>
+
+      <!-- Exam Graded Banner (shown after submitting Exam Mode) -->
+      <div id="exam-review-banner" class="hidden bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <p class="text-sm font-bold text-emerald-900">Đã chấm điểm chu kỳ hiện tại!</p>
+          <p id="exam-review-stats" class="text-xs text-emerald-700 mt-0.5"></p>
+        </div>
+        <button onclick="openSummaryModal()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shrink-0">
+          Xem bảng tổng kết
+        </button>
+      </div>
+
+      <!-- Carousel Question Card -->
+      <div id="question-card" class="bg-white rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-8 animate-fade-slide">
+        <!-- Card Top Meta -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-5 pb-4 border-b border-slate-100">
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="q-position" class="px-3 py-1 rounded-full bg-slate-800 text-white text-xs font-bold">Câu 1 / 50</span>
+            <span id="q-original-id" class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">Q1</span>
+            <span id="q-lo-badge" class="px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 text-xs font-semibold border border-teal-100">LO 2a</span>
+            <span id="q-multi-badge" class="hidden px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-100">Chọn 2 đáp án</span>
+          </div>
+
+          <!-- Flag Button -->
+          <button id="btn-flag" onclick="toggleFlagCurrent()" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border text-xs font-semibold transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+            <span id="btn-flag-text">Phân vân / Chọn lụi</span>
+          </button>
+        </div>
+
+        <!-- Question Text -->
+        <div id="q-text" class="text-base sm:text-lg font-semibold text-slate-800 leading-relaxed whitespace-pre-line mb-6"></div>
+
+        <!-- Options List -->
+        <div id="q-options" class="space-y-3"></div>
+
+        <!-- Multi-choice Check Button (Practice Mode) -->
+        <div id="multi-check-wrap" class="hidden mt-5">
+          <button id="btn-check-multi" onclick="submitMultiPractice()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm transition-colors">
+            Kiểm tra đáp án
+          </button>
+        </div>
+
+        <!-- Explanation Box -->
+        <div id="explanation-box" class="hidden mt-6 p-4 sm:p-5 rounded-2xl border">
+          <div class="flex items-center gap-2 mb-2">
+            <span id="exp-status-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold"></span>
+            <span class="text-xs font-semibold text-slate-500">Giải thích cốt lõi (ICAEW)</span>
+          </div>
+          <p id="exp-correct-answer" class="text-xs sm:text-sm font-semibold text-slate-800 mb-2"></p>
+          <p id="exp-text" class="text-sm text-slate-700 leading-relaxed"></p>
+        </div>
+
+        <!-- Carousel Prev / Next Footer -->
+        <div class="mt-8 pt-5 border-t border-slate-100 flex items-center justify-between gap-3">
+          <button id="btn-prev" onclick="prevQuestion()" class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 text-sm font-semibold transition-colors">
+            ← Câu trước
+          </button>
+          <span class="hidden sm:inline text-xs text-slate-400">Dùng phím ← / → để chuyển câu</span>
+          <button id="btn-next" onclick="nextQuestion()" class="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm transition-colors">
+            Câu tiếp →
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: FLASHCARDS ==================== -->
+    <section id="view-flashcards" class="hidden space-y-5">
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base font-bold text-slate-800">Flashcards ôn tập mỗi ngày (Chapter 2)</h2>
+          <p class="text-xs text-slate-500">Chạm vào thẻ hoặc nhấn phím <kbd class="px-1.5 py-0.5 bg-slate-100 rounded border border-slate-300 text-[10px]">Space</kbd> để lật mặt sau</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="inline-flex bg-slate-100 p-1 rounded-xl">
+            <button id="fc-filter-all" onclick="setFlashcardFilter('all')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-emerald-700 shadow-sm">
+              Tất cả (<span id="fc-total-count">22</span>)
+            </button>
+            <button id="fc-filter-review" onclick="setFlashcardFilter('review')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600">
+              Cần ôn lại (<span id="fc-review-count">22</span>)
+            </button>
+          </div>
+          <button onclick="shuffleFlashcards()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors">
+            ↻ Xáo trộn
+          </button>
+        </div>
+      </div>
+
+      <!-- Flashcard Progress -->
+      <div class="flex items-center justify-between text-xs text-slate-500 px-1">
+        <span id="fc-position" class="font-semibold text-slate-700">Thẻ 1 / 22</span>
+        <span id="fc-mastered-stats" class="font-semibold text-emerald-700">Đã nhớ: 0 / 22</span>
+      </div>
+
+      <!-- 3D Flip Card -->
+      <div id="fc-container" class="perspective-1000 w-full max-w-2xl mx-auto">
+        <div id="fc-card" onclick="flipFlashcard()" class="relative w-full min-h-[300px] sm:min-h-[340px] cursor-pointer transform-style-3d">
+          <!-- Front -->
+          <div class="absolute inset-0 backface-hidden bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-10 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span id="fc-front-tag" class="px-3 py-1 rounded-full bg-teal-50 text-teal-700 text-xs font-bold border border-teal-100">LO 2a</span>
+              <span id="fc-status-pill" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-500">Chưa đánh giá</span>
+            </div>
+            <div class="text-center my-auto py-4">
+              <p class="text-xs uppercase tracking-widest text-slate-400 font-semibold mb-2">Khái niệm / Thuật ngữ</p>
+              <h3 id="fc-front-text" class="text-xl sm:text-2xl font-bold text-slate-800 leading-snug"></h3>
+            </div>
+            <p class="text-center text-xs text-slate-400">Nhấn để xem định nghĩa & từ khóa cốt lõi</p>
+          </div>
+
+          <!-- Back -->
+          <div class="absolute inset-0 backface-hidden rotate-y-180 bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-3xl shadow-md p-6 sm:p-10 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="px-3 py-1 rounded-full bg-white/15 text-white text-xs font-bold">Kiến thức cốt lõi</span>
+              <span id="fc-back-tag" class="text-xs text-emerald-100 font-semibold"></span>
+            </div>
+            <div class="my-auto py-3 space-y-3">
+              <p id="fc-back-text" class="text-sm sm:text-base leading-relaxed font-medium whitespace-pre-line"></p>
+              <div id="fc-back-tip" class="p-3 rounded-xl bg-black/15 text-xs sm:text-sm text-emerald-50"></div>
+            </div>
+            <p class="text-center text-xs text-emerald-200">Nhấn để lật lại mặt trước</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Flashcard Actions -->
+      <div class="max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+        <button onclick="prevFlashcard()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-semibold">
+          ← Thẻ trước
+        </button>
+
+        <div class="flex items-center gap-2.5 w-full sm:w-auto justify-center">
+          <button onclick="markFlashcard('review')" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-800 text-sm font-semibold transition-colors">
+            Cần ôn lại
+          </button>
+          <button onclick="markFlashcard('mastered')" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm transition-colors">
+            ✓ Đã nhớ
+          </button>
+        </div>
+
+        <button onclick="nextFlashcard()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-semibold">
+          Thẻ tiếp →
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: REVIEW & STATS ==================== -->
+    <section id="view-review" class="hidden space-y-6">
+
+      <!-- Overview Stats Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <p class="text-xs text-slate-500 font-medium">Chu kỳ đã hoàn thành</p>
+          <p id="stat-cycles" class="text-2xl font-extrabold text-slate-800 mt-1">0</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <p class="text-xs text-slate-500 font-medium">Tỷ lệ sai gần nhất</p>
+          <p id="stat-last-error" class="text-2xl font-extrabold text-rose-600 mt-1">--%</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <p class="text-xs text-slate-500 font-medium">Câu đang phân vân</p>
+          <p id="stat-flagged" class="text-2xl font-extrabold text-amber-600 mt-1">0</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <p class="text-xs text-slate-500 font-medium">Flashcards đã nhớ</p>
+          <p id="stat-fc-mastered" class="text-2xl font-extrabold text-emerald-600 mt-1">0/22</p>
+        </div>
+      </div>
+
+      <!-- Flagged Questions Section -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div>
+            <h2 class="text-base font-bold text-slate-800">Danh sách câu Phân vân / Chọn lụi</h2>
+            <p class="text-xs text-slate-500">Các câu bạn đã bấm nút đánh dấu khi làm bài sẽ được lưu tại đây.</p>
+          </div>
+          <button id="btn-practice-flagged" onclick="startFlaggedOnlyCycle()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-white text-xs font-semibold shadow-sm transition-colors">
+            Luyện riêng các câu đánh dấu
+          </button>
+        </div>
+        <div id="flagged-list" class="space-y-3"></div>
+      </div>
+
+      <!-- Cycle History Section -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-base font-bold text-slate-800">Lịch sử các chu kỳ ôn tập</h2>
+            <p class="text-xs text-slate-500">Theo dõi tỷ lệ sai giảm dần qua từng chu kỳ xáo trộn.</p>
+          </div>
+          <div id="reset-confirm-area">
+            <button onclick="showResetConfirm()" class="text-xs font-semibold text-rose-600 hover:text-rose-800 underline">
+              Xóa toàn bộ dữ liệu
+            </button>
+          </div>
+        </div>
+        <div id="history-list" class="overflow-x-auto"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Cycle Summary Modal -->
+  <div id="summary-modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-xl animate-fade-slide">
+      <div class="text-center mb-5">
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl font-bold mb-3">
+          ✓
+        </div>
+        <h3 class="text-xl font-extrabold text-slate-800">Hoàn thành chu kỳ!</h3>
+        <p id="modal-cycle-subtitle" class="text-xs text-slate-500 mt-1"></p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 mb-6">
+        <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-100 text-center">
+          <p class="text-xs text-emerald-700 font-medium">Điểm / Chính xác</p>
+          <p id="modal-correct" class="text-xl font-extrabold text-emerald-700 mt-0.5">0/50 (0%)</p>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-100 text-center">
+          <p class="text-xs text-rose-700 font-medium">Tỷ lệ sai</p>
+          <p id="modal-error-rate" class="text-2xl font-extrabold text-rose-600 mt-0.5">0%</p>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+          <p class="text-xs text-slate-600 font-medium">Số câu sai</p>
+          <p id="modal-wrong" class="text-xl font-bold text-slate-800 mt-0.5">0</p>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-100 text-center">
+          <p class="text-xs text-amber-700 font-medium">Phân vân / Lụi</p>
+          <p id="modal-flagged" class="text-xl font-bold text-amber-700 mt-0.5">0</p>
+        </div>
+      </div>
+
+      <div class="space-y-2.5">
+        <button id="modal-btn-review-weak" onclick="startWeakCycleFromModal()" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold shadow-sm transition-colors">
+          Ôn lại câu sai & phân vân
+        </button>
+        <button onclick="startNewCycle(true)" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm transition-colors">
+          Bắt đầu chu kỳ mới (Xáo trộn 50 câu)
+        </button>
+        <button onclick="closeSummaryModal()" class="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold transition-colors">
+          Đóng & xem lại từng câu
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="hidden fixed bottom-5 right-5 z-50 bg-slate-800 text-white text-xs sm:text-sm font-medium px-4 py-3 rounded-xl shadow-lg"></div>
+
+  <script>
+    // =========================================================================
+    // 1. COMPLETE VERIFIED QUESTION BANK DATA — CHAPTER 2 (ALL 50 QUESTIONS)
+    // =========================================================================
+    const QUESTIONS = [
+      {
+        id: "Q1", lo: "LO 2a", type: "single",
+        question: "To what does the term 'triple bottom line' refer?",
+        options: [
+          { key: "A", text: "Operating profit, profit before tax, profit after tax" },
+          { key: "B", text: "Profit, planet, people" },
+          { key: "C", text: "Profit after tax, dividends to shareholders, climate change" },
+          { key: "D", text: "Resilience, profitability, competitiveness" }
+        ],
+        correct: ["B"],
+        explanation: "The triple bottom line framework encourages businesses to focus on three key areas, often referred to as the 'three Ps' - profits, planet, people."
+      },
+      {
+        id: "Q2", lo: "LO 2d", type: "single",
+        question: "Which of the following statements relating to the sustainability objectives of a business is correct?",
+        options: [
+          { key: "A", text: "Businesses that are interested in maximising the wealth of owners should ignore sustainability objectives" },
+          { key: "B", text: "Businesses should only adopt sustainability objectives if the costs are less than the fines of poor sustainability behaviour" },
+          { key: "C", text: "The value of a business over the longer term is enhanced by good sustainability practices" },
+          { key: "D", text: "Businesses should prioritise sustainability objectives only if their competitors are doing so" }
+        ],
+        correct: ["C"],
+        explanation: "While good sustainability practices may involve additional costs to businesses, sustainable practices help organisations to achieve long-term viability by mitigating risks associated with environmental degradation and social unrest without losing sight of profit (economic sustainability)."
+      },
+      {
+        id: "Q3", lo: "LO 2b", type: "multi", selectCount: 2,
+        question: "A freshwater fish population in a large lake is declining. Environmental researchers have observed that the water quality has deteriorated.\n\nRequirement: Which two of the following are most likely to be the main causes of the deterioration of water quality?",
+        options: [
+          { key: "A", text: "Chronic overfishing by local communities" },
+          { key: "B", text: "Water pollution leading to oxygen depletion" },
+          { key: "C", text: "Increased level of noise pollution from nearby human activities" },
+          { key: "D", text: "Temperature changes due to global warming" },
+          { key: "E", text: "Increased levels of wild swimming by the local community in the lake" }
+        ],
+        correct: ["B", "D"],
+        explanation: "Water pollution introduces harmful substances and nutrients leading to eutrophication and oxygen depletion (dead zones). Global warming leads to more storms and acute rainfall events releasing brown water or pesticides into freshwater."
+      },
+      {
+        id: "Q4", lo: "LO 2b", type: "single",
+        question: "The ongoing decrease in the pH levels of the Earth's oceans is primarily due to the absorption of carbon dioxide (CO₂) from the atmosphere.\n\nRequirement: This statement describes which of the following?",
+        options: [
+          { key: "A", text: "Water pollution" },
+          { key: "B", text: "Global warming" },
+          { key: "C", text: "Ocean acidification" },
+          { key: "D", text: "Air pollution" }
+        ],
+        correct: ["C"],
+        explanation: "Ocean acidification refers to the ongoing decrease in the pH levels of the Earth's oceans, primarily due to the absorption of carbon dioxide (CO₂) from the atmosphere."
+      },
+      {
+        id: "Q5", lo: "LO 2b", type: "multi", selectCount: 3,
+        question: "Global warming refers to the increase in Earth's average surface temperature primarily due to the rising levels of greenhouse gases (GHGs) such as carbon dioxide, methane and nitrous oxide.\n\nRequirement: Which three of the following are a direct implication of global warming?",
+        options: [
+          { key: "A", text: "Rising sea levels" },
+          { key: "B", text: "More frequent and severe heatwaves" },
+          { key: "C", text: "Increased intensity of hurricanes" },
+          { key: "D", text: "Contamination of air, water and soil" },
+          { key: "E", text: "Overexploitation of native species" }
+        ],
+        correct: ["A", "B", "C"],
+        explanation: "Global warming leads to rising sea levels (A), more frequent and intense heatwaves (B), and increased intensity of hurricanes (C) due to higher energy in the atmosphere and oceans. Contamination (D) is caused by pollution, and overexploitation (E) is caused by human actions like hunting/poaching."
+      },
+      {
+        id: "Q6", lo: "LO 2b", type: "single",
+        question: "Climate change refers to long-term changes in temperature, precipitation and other atmospheric conditions on Earth.\n\nRequirement: Which of the following human activities is the least contributor to climate change?",
+        options: [
+          { key: "A", text: "Recycling household waste" },
+          { key: "B", text: "Burning fossil fuels for energy" },
+          { key: "C", text: "Deforestation" },
+          { key: "D", text: "Agricultural practices involving methane emissions" }
+        ],
+        correct: ["A"],
+        explanation: "While recycling benefits the environment, its direct impact on climate change is relatively minor compared to burning fossil fuels, deforestation, and agricultural methane emissions, which are major sources of GHGs."
+      },
+      {
+        id: "Q7", lo: "LO 2b", type: "single",
+        question: "A small mammal species in a tropical rainforest has experienced a significant population decline over the past decade.\n\nRequirement: Which of the following is the leading cause of species decline in rainforests?",
+        options: [
+          { key: "A", text: "Temperature changes due to global warming" },
+          { key: "B", text: "Increased level of noise pollution from human activity" },
+          { key: "C", text: "Deforestation" },
+          { key: "D", text: "Overfishing in nearby marine areas" }
+        ],
+        correct: ["C"],
+        explanation: "In tropical rainforests, deforestation is a leading cause of species decline because it eliminates the natural habitat species rely on for food, shelter, and breeding."
+      },
+      {
+        id: "Q8", lo: "LO 2d", type: "single",
+        question: "Ocean acidification, caused by increased absorption of carbon dioxide (CO₂) from the atmosphere, has significant economic implications for the fisheries and aqua farming industries.\n\nRequirement: Which of the following economic consequences is most directly associated with ocean acidification?",
+        options: [
+          { key: "A", text: "Decreased tourism in coastal areas" },
+          { key: "B", text: "Reduced production of commercially important shellfish" },
+          { key: "C", text: "Budget cuts in marine conservation programmes" },
+          { key: "D", text: "Increased cost of seafood due to overfishing" }
+        ],
+        correct: ["B"],
+        explanation: "Ocean acidification affects the ability of marine organisms such as shellfish to build and maintain their calcium carbonate shells, leading to weaker structures, higher mortality rates, and lower aquaculture output."
+      },
+      {
+        id: "Q9", lo: "LO 2b", type: "single",
+        question: "Both ocean and forest ecosystems play a vital role in mitigating global warming.\n\nRequirement: Which of the following explains the roles of oceans and forests in climate change?",
+        options: [
+          { key: "A", text: "Forests and oceans absorb more carbon dioxide than they release" },
+          { key: "B", text: "Forests and oceans release more carbon dioxide than they absorb" },
+          { key: "C", text: "Forests absorb carbon dioxide, while oceans absorb oxygen" },
+          { key: "D", text: "Both forests and oceans are solely sources of oxygen and do not affect carbon dioxide levels" }
+        ],
+        correct: ["A"],
+        explanation: "Forests and oceans act as carbon sinks, absorbing significant amounts of carbon dioxide in a process known as carbon sequestration, reducing atmospheric GHG concentrations."
+      },
+      {
+        id: "Q10", lo: "LO 2b", type: "single",
+        question: "Protecting forests is vital for the carbon cycle to operate effectively for climate regulation.\n\nRequirement: How would the installation of solar energy systems complement the role of forests in addressing climate change?",
+        options: [
+          { key: "A", text: "Solar energy systems increase the carbon absorption capacity of forests" },
+          { key: "B", text: "Solar energy systems decrease carbon emissions compared with fossil fuels reducing the carbon dioxide in the atmosphere" },
+          { key: "C", text: "The installation of solar energy systems directly converts atmospheric carbon dioxide into clean energy" },
+          { key: "D", text: "Solar energy systems have no role in addressing climate change" }
+        ],
+        correct: ["B"],
+        explanation: "Solar energy reduces reliance on fossil fuels, decreasing overall GHG emissions and mitigating the pressure on forests (natural carbon sinks) to absorb these emissions."
+      },
+      {
+        id: "Q11", lo: "LO 2b", type: "single",
+        question: "The following two statements have been made about the role of forests and oceans in carbon sequestration:\n(1) Mature forests have a higher rate of carbon sequestration than young growing forests.\n(2) Oceans absorb carbon dioxide primarily through seaweed activity.\n\nRequirement: Which of the statements is/are true?",
+        options: [
+          { key: "A", text: "Both 1 and 2 are true" },
+          { key: "B", text: "1 is true, but 2 is false" },
+          { key: "C", text: "2 is true, but 1 is false" },
+          { key: "D", text: "Both 1 and 2 are false" }
+        ],
+        correct: ["D"],
+        explanation: "Young growing forests absorb carbon at a faster rate during their rapid growth phase (though mature forests store more total carbon). Oceanic carbon sequestration occurs mainly through CO₂ dissolving in seawater and phytoplankton activity, not primarily seaweed."
+      },
+      {
+        id: "Q12", lo: "LO 2b", type: "single",
+        question: "Deforestation is the large-scale removal of forest cover, which has significant implications for the environment.\n\nRequirement: Which of the following is a direct consequence of deforestation?",
+        options: [
+          { key: "A", text: "Loss of biodiversity" },
+          { key: "B", text: "Increased soil fertility" },
+          { key: "C", text: "Improved air quality" },
+          { key: "D", text: "Reduced greenhouse gas emissions" }
+        ],
+        correct: ["A"],
+        explanation: "Deforestation destroys natural habitats, resulting in the loss of species and reduced biodiversity. It also causes soil erosion/degradation and deteriorates air quality."
+      },
+      {
+        id: "Q13", lo: "LO 2b", type: "single",
+        question: "Deforestation impacts upon various natural processes, including those involving water cycles.\n\nRequirement: How does deforestation affect the local water cycle?",
+        options: [
+          { key: "A", text: "It increases surface runoff and increases the chances of flooding" },
+          { key: "B", text: "It stabilises water sources and prevents flooding" },
+          { key: "C", text: "It enhances the groundwater levels by increasing infiltration" },
+          { key: "D", text: "It reduces surface runoff and prevents soil erosion" }
+        ],
+        correct: ["A"],
+        explanation: "When trees and vegetation are removed, soil becomes compacted and loses its ability to absorb water efficiently, resulting in higher surface runoff, soil erosion, lower groundwater levels, and flash flooding."
+      },
+      {
+        id: "Q14", lo: "LO 2d, 2e", type: "single",
+        question: "The following two statements have been made in relation to the economic impact of deforestation:\n(1) Deforestation reduces income from forestry-related activities.\n(2) Deforestation increases local employment opportunities from other sources.\n\nRequirement: Which of the statements is/are true?",
+        options: [
+          { key: "A", text: "Only statement 1 is true" },
+          { key: "B", text: "Only statement 2 is true" },
+          { key: "C", text: "Both statement 1 and statement 2 are true" },
+          { key: "D", text: "Neither statement 1 nor statement 2 are true" }
+        ],
+        correct: ["C"],
+        explanation: "Deforestation removes trees that provide income for forestry communities (logging, rubber tapping), while also often creating space for oil palm, soy, or cattle grazing, which increases local employment from other sources."
+      },
+      {
+        id: "Q15", lo: "LO 2c", type: "single",
+        question: "A city council is implementing a comprehensive strategy to tackle poverty within its urban areas.\n\nRequirement: Which of the following measures specifically targets poverty?",
+        options: [
+          { key: "A", text: "Creating a mentorship programme for startup entrepreneurs" },
+          { key: "B", text: "Providing free healthcare services to low-income families" },
+          { key: "C", text: "Building a high-tech business park to attract new businesses and investment in the area" },
+          { key: "D", text: "Implementing a city-wide recycling programme" }
+        ],
+        correct: ["B"],
+        explanation: "Providing free healthcare to low-income families directly addresses a fundamental basic need and improves the standard of living of those living in poverty."
+      },
+      {
+        id: "Q16", lo: "LO 2c", type: "single",
+        question: "Stastrid BV (Stastrid) has the results of an employee survey that shows a reduction in employee wellbeing, a perception that work-life balance is not supported by Stastrid, and a decline in overall productivity.\n\nRequirement: Which of the following strategies would help to address the problems noted at Stastrid?",
+        options: [
+          { key: "A", text: "Introduce flexible working hours" },
+          { key: "B", text: "Schedule mandatory team-building activities" },
+          { key: "C", text: "Offer higher bonuses for completing additional hours of work" },
+          { key: "D", text: "Require employees to take a five-minute break every hour during the working day" }
+        ],
+        correct: ["A"],
+        explanation: "Flexible working hours help employees manage personal and professional responsibilities, improving work-life balance and reducing stress and burnout."
+      },
+      {
+        id: "Q17", lo: "LO 2c", type: "single",
+        question: "Buncha Ltd (Buncha) recently launched a comprehensive diversity and inclusion program including mandatory unconscious bias training, employee resource groups, and mentorship for underrepresented employees.\n\nRequirement: Which of the following outcomes would Buncha be most likely to experience?",
+        options: [
+          { key: "A", text: "Decreased operational costs" },
+          { key: "B", text: "Increased innovation" },
+          { key: "C", text: "Reduction in product prices" },
+          { key: "D", text: "Immediate increase in market share" }
+        ],
+        correct: ["B"],
+        explanation: "Promoting diversity brings together a wide range of experiences and perspectives, fostering creativity, better problem solving, and enhanced innovation."
+      },
+      {
+        id: "Q18", lo: "LO 2c", type: "single",
+        question: "Vumina SA (Vumina) is trying to implement a workplace diversity initiative but has encountered barriers including staff resistance and difficulty attracting diverse talent.\n\nRequirement: Which of the following is a common challenge that Vumina might face in implementing its diversity initiative?",
+        options: [
+          { key: "A", text: "Unconscious bias during the hiring process" },
+          { key: "B", text: "Lack of customer interest in diversity" },
+          { key: "C", text: "Limited office space for new employees" },
+          { key: "D", text: "Low demand for new product lines" }
+        ],
+        correct: ["A"],
+        explanation: "Unconscious bias can significantly impact the hiring process, making it challenging to create a diverse workforce."
+      },
+      {
+        id: "Q19", lo: "LO 2c", type: "single",
+        question: "Nokana GmbH (Nokana) has recently experienced an increase in workplace accidents, including trips and falls, resulting in minor injuries.\n\nRequirement: Which of the following actions should Nokana take to create a comprehensive safe working environment?",
+        options: [
+          { key: "A", text: "Improve current facilities and implement a thorough workplace safety programme supported by regular safety audits and employee training" },
+          { key: "B", text: "Increase the number of first aid kits and emergency response teams to handle workplace accidents more efficiently" },
+          { key: "C", text: "Install more security cameras to monitor and record incidents as they occur" },
+          { key: "D", text: "Establish a reporting channel through which employees can report safety concerns to management" }
+        ],
+        correct: ["A"],
+        explanation: "Improving facilities and implementing a thorough safety programme with regular audits and training addresses root causes and creates a proactive safety culture."
+      },
+      {
+        id: "Q20", lo: "LO 2c", type: "multi", selectCount: 2,
+        question: "During an audit of Avvex BV, concerning labour practices were discovered (significant recruitment fees, long hours without breaks, passports taken, different job conditions than promised, threats if complaining).\n\nRequirement: Which two of the following practices suggest that Avvex might be engaging in modern slavery?",
+        options: [
+          { key: "A", text: "Workers had their passports taken by their employers" },
+          { key: "B", text: "Workers were working long hours without proper breaks" },
+          { key: "C", text: "Workers reported being charged significant recruitment fees that must be paid off over a long period of employment" },
+          { key: "D", text: "Workers experienced different job conditions than what they were promised" },
+          { key: "E", text: "Workers were subjected to threats to discourage complaints" }
+        ],
+        correct: ["A", "C"],
+        explanation: "Modern slavery is indicated by confiscating passports (A), which restricts freedom to leave, and charging significant recruitment fees (C), which can lead to debt bondage."
+      },
+      {
+        id: "Q21", lo: "LO 2d", type: "single",
+        question: "Pulsea Ltd relies heavily on fossil fuels for its energy needs and faces concerns about non-renewable resource depletion and rising energy costs.\n\nRequirement: Which strategy should Pulsea implement to address resource depletion and enhance sustainability?",
+        options: [
+          { key: "A", text: "Make investment in energy companies with large fossil fuel reserves to ensure an uninterrupted energy supply" },
+          { key: "B", text: "Acquire smaller technology companies to diversify business operations" },
+          { key: "C", text: "Raise product prices to compensate for increased energy costs" },
+          { key: "D", text: "Invest in renewable energy sources, such as solar and wind power" }
+        ],
+        correct: ["D"],
+        explanation: "Investing in renewable energy reduces reliance on non-renewable resources, addresses resource depletion, and helps lower long-term energy costs."
+      },
+      {
+        id: "Q22", lo: "LO 2e", type: "single",
+        question: "Zorbat Ltd has introduced a policy to ensure all employees receive a living wage covering basic living expenses and monitored against inflation.\n\nRequirement: Which of the following statements is true in relation to this living wage policy?",
+        options: [
+          { key: "A", text: "It will enhance social sustainability" },
+          { key: "B", text: "It will enhance social and economic sustainability" },
+          { key: "C", text: "It will enhance social, economic and environmental sustainability" },
+          { key: "D", text: "It will have no significant impact on sustainability" }
+        ],
+        correct: ["B"],
+        explanation: "A living wage directly enhances social sustainability (employee wellbeing) and improves economic sustainability by boosting job satisfaction, productivity, and loyalty while reducing turnover and hiring/training costs."
+      },
+      {
+        id: "Q23", lo: "LO 2e", type: "single",
+        question: "Wavesol GmbH is considering introducing a profit-sharing scheme distributing a portion of annual profits to employees based on salary and tenure.\n\nRequirement: How will this impact economic and social sustainability?",
+        options: [
+          { key: "A", text: "It will enhance economic and social sustainability by increasing employee motivation and reducing income inequality within the company" },
+          { key: "B", text: "It will undermine economic sustainability by reducing the overall profits available for reinvestment in the company, but will boost social sustainability by improving the standard of living of the employees" },
+          { key: "C", text: "It will harm social sustainability as it emphasises disparities between employees by discriminating based on their salary and tenure, however it will enhance economic sustainability by improving productivity" },
+          { key: "D", text: "It will undermine both social and economic sustainability through the reinforcement of disparities and the reduction of profits for reinvestment" }
+        ],
+        correct: ["A"],
+        explanation: "Profit-sharing aligns employee interests with company performance, boosting motivation and productivity (economic sustainability) while ensuring all employees benefit from company success and reducing income inequality (social sustainability)."
+      },
+      {
+        id: "Q24", lo: "LO 2b", type: "multi", selectCount: 2,
+        question: "Boltdup Ltd uses energy-efficient data centres, develops software solutions that reduce energy consumption, runs a device recycling program, and invests in renewable energy projects, aiming to become net-zero by 20X9.\n\nRequirement: Which two actions directly support its goal of becoming carbon neutral?",
+        options: [
+          { key: "A", text: "Using energy-efficient data centres" },
+          { key: "B", text: "Developing software solutions (products) that reduce energy consumption" },
+          { key: "C", text: "Expanding the online presence and direct to customer sales channels" },
+          { key: "D", text: "Donating 1% of sales to environmental causes" },
+          { key: "E", text: "Investing in carbon offset projects" }
+        ],
+        correct: ["A", "B"],
+        explanation: "Energy-efficient data centres (A) directly reduce operational energy consumption and carbon footprint. Developing energy-reducing software (B) reduces carbon emissions in Boltdup's Scope 3 value chain. Donating (D) and carbon offsets (E) are indirect approaches."
+      },
+      {
+        id: "Q25", lo: "LO 2d", type: "single",
+        question: "The directors of Buzinity SpA are planning to improve its economic sustainability by ensuring long-term growth.\n\nRequirement: Which strategy should Buzinity adopt to support long-term economic growth?",
+        options: [
+          { key: "A", text: "Increasing production output using existing methods" },
+          { key: "B", text: "Offering large discounts to boost sales" },
+          { key: "C", text: "Investing in research and development (R&D) for innovative technologies" },
+          { key: "D", text: "Reducing employee training programmes to cut costs" }
+        ],
+        correct: ["C"],
+        explanation: "Investing in R&D for innovative technologies supports long-term economic growth by fostering innovation, improving efficiency, and maintaining competitiveness."
+      },
+      {
+        id: "Q26", lo: "LO 2e", type: "single",
+        question: "Briggy Ltd is considering investing in solar and wind energy projects but is concerned about short-term high costs.\n\nRequirement: Which statement correctly explains the balance between economic growth and environmental sustainability?",
+        options: [
+          { key: "A", text: "Investing in renewable energy projects supports long-term sustainable economic growth by reducing dependence on fossil fuels and lowering greenhouse gas emissions" },
+          { key: "B", text: "Investing in renewable energy projects increases short-term profitability by minimising initial capital expenditures" },
+          { key: "C", text: "Expanding renewable energy projects has no significant impact on environmental sustainability and only serves to enhance the company's reputation" },
+          { key: "D", text: "Focusing on renewable energy undermines economic growth by reducing the competitive advantage of traditional energy sources" }
+        ],
+        correct: ["A"],
+        explanation: "Despite high initial costs, renewable energy investments contribute to both environmental sustainability and long-term economic benefits by reducing emissions and reliance on non-renewable resources."
+      },
+      {
+        id: "Q27", lo: "LO 2e", type: "single",
+        question: "Arbre SA recently launched a community project aimed at planting trees in urban areas and committed to employing local residents for the project.\n\nRequirement: Which pillars of sustainability are supported by this project?",
+        options: [
+          { key: "A", text: "Environmental sustainability and social sustainability" },
+          { key: "B", text: "Environmental sustainability and economic sustainability" },
+          { key: "C", text: "Social sustainability and economic sustainability" },
+          { key: "D", text: "Environmental sustainability, social sustainability and economic sustainability" }
+        ],
+        correct: ["D"],
+        explanation: "Planting trees improves environmental sustainability (reducing air pollution), employing locals and improving urban aesthetics/health supports social sustainability, and injecting wages into the community stimulates economic sustainability."
+      },
+      {
+        id: "Q28", lo: "LO 2e", type: "single",
+        question: "Chrill Ltd plans to clear an area of forest to build a new factory, using local contractors and staffing it with local workers.\n\nRequirement: Which statement describes the sustainability impact of the expansion?",
+        options: [
+          { key: "A", text: "There is a trade-off between a negative impact on environmental sustainability and a positive impact on social sustainability and economic sustainability" },
+          { key: "B", text: "Only economic sustainability will be enhanced by this decision; environmental and social sustainability will both be negatively impacted" },
+          { key: "C", text: "There are no positive sustainability impacts from this decision; environmental sustainability, social sustainability and economic sustainability are all harmed" },
+          { key: "D", text: "Environmental sustainability is the most important of the pillars. The expansion project therefore has an overall detrimental impact and should not be undertaken" }
+        ],
+        correct: ["A"],
+        explanation: "Clearing forest harms environmental sustainability (deforestation, biodiversity loss, less carbon sequestration), while employing local contractors and workers benefits social and economic sustainability through jobs and wages."
+      },
+      {
+        id: "Q29", lo: "LO 2c", type: "single",
+        question: "A mining company, Wineur GmbH, is looking to expand its operations in rural areas.\n\nRequirement: Which strategy should Wineur prioritise to maintain sustainability?",
+        options: [
+          { key: "A", text: "Maximising short-term profits by increasing production capacity immediately" },
+          { key: "B", text: "Providing fair wages and safe working conditions for all employees" },
+          { key: "C", text: "Focusing solely on implementing technological advancements to improve mining efficiency" },
+          { key: "D", text: "Investing in marketing campaigns to improve the company's public image" }
+        ],
+        correct: ["B"],
+        explanation: "Providing fair wages and safe working conditions (B) is a vital part of social sustainability, whereas short-term profit maximisation, tech-only focus, or marketing campaigns neglect holistic environmental and social responsibilities."
+      },
+      {
+        id: "Q30", lo: "LO 2d", type: "multi", selectCount: 2,
+        question: "A mining company, Fosse SpA, faces volatile selling prices and resource depletion at its primary extraction site.\n\nRequirement: Which two strategies should Fosse implement to achieve economic sustainability?",
+        options: [
+          { key: "A", text: "Increasing extraction rates to maximise short-term profits before the resources at the extraction site run out" },
+          { key: "B", text: "Investing in renewable energy sources and technologies" },
+          { key: "C", text: "Diversification of revenue streams, such as investing in related industries" },
+          { key: "D", text: "Reducing workforce numbers to lower operational costs" },
+          { key: "E", text: "Expanding operations to multiple extraction sites without considering environmental impact" }
+        ],
+        correct: ["B", "C"],
+        explanation: "Investing in renewable energy (B) lowers long-term operational costs and non-renewable reliance, while diversifying revenue streams (C) reduces single-market dependence and mitigates financial risks."
+      },
+      {
+        id: "Q31", lo: "LO 2b", type: "single",
+        question: "SwartGear Ltd is a manufacturer of electronic devices looking to implement more sustainable manufacturing practices.\n\nRequirement: Which strategy would be most effective in reducing Swart's overall environmental impact?",
+        options: [
+          { key: "A", text: "Expanding the manufacturing plant to increase production capacity" },
+          { key: "B", text: "Outsourcing production to countries with less stringent environmental regulations" },
+          { key: "C", text: "Increasing the volume of raw material procurement to ensure a continuous supply" },
+          { key: "D", text: "Investing in energy-efficient machinery to reduce energy consumption" }
+        ],
+        correct: ["D"],
+        explanation: "Investing in energy-efficient machinery directly addresses resource consumption and significantly lowers the carbon footprint of the manufacturing process."
+      },
+      {
+        id: "Q32", lo: "LO 2b", type: "single",
+        question: "CloudyBase Ltd operates several large data centres and wants to reduce its environmental footprint, particularly energy consumption.\n\nRequirement: Which strategy will best help CloudyBase mitigate the environmental impact of its data centres?",
+        options: [
+          { key: "A", text: "Obtaining energy from renewable sources for data centres" },
+          { key: "B", text: "Opening an additional data centre with more energy-efficient computing hardware" },
+          { key: "C", text: "Implementing a policy to turn off unused equipment, although the servers would remain on at all times" },
+          { key: "D", text: "Outsourcing data processing to regions with lower environmental regulation" }
+        ],
+        correct: ["A"],
+        explanation: "Sourcing renewable energy directly addresses the environmental impact of energy consumption with sustainable, low-carbon power, offering much greater impact than turning off unused equipment while servers stay on."
+      },
+      {
+        id: "Q33", lo: "LO 2e", type: "single",
+        question: "FashionVista SA is launching a clothing line made from 100% recycled materials, providing additional employee training, and potentially changing its supply chain.\n\nRequirement: How would this strategy impact economic sustainability?",
+        options: [
+          { key: "A", text: "There will be no impact on economic sustainability. This strategy enhances environmental and social sustainability only" },
+          { key: "B", text: "It will have a positive impact on economic sustainability due to the immediate cost savings" },
+          { key: "C", text: "It will have a negative impact on economic sustainability as the significant costs of producing this line outweigh any benefit that could possibly be achieved" },
+          { key: "D", text: "It will have a potentially positive impact on economic sustainability through market differentiation and changing customer behaviour" }
+        ],
+        correct: ["D"],
+        explanation: "Despite upfront costs, positive environmental impacts, staff training, and ethical practices improve reputation, differentiate the brand, and positively influence customer behaviour."
+      },
+      {
+        id: "Q34", lo: "LO 2b", type: "single",
+        question: "Oceanic Cargo Ltd's ships have been releasing plastic waste into marine environments, causing marine animal incidents and floating islands of debris.\n\nRequirement: Which environmental issue is Oceanic primarily contributing to?",
+        options: [
+          { key: "A", text: "Air pollution" },
+          { key: "B", text: "Sea level rises" },
+          { key: "C", text: "Plastic pollution" },
+          { key: "D", text: "Ocean acidification" }
+        ],
+        correct: ["C"],
+        explanation: "Dumping plastic waste into oceans leading to ingestion/entanglement by marine animals and floating debris islands is consistent with plastic pollution."
+      },
+      {
+        id: "Q35", lo: "LO 2c", type: "single",
+        question: "EchoPlants Ltd operates manufacturing plants in a densely populated urban area. Continuous loud sounds from machinery and trucks during night shifts have disrupted sleep, increased stress, and caused hearing and mental health issues.\n\nRequirement: Which sustainability issue is EchoPlants contributing to?",
+        options: [
+          { key: "A", text: "Air pollution" },
+          { key: "B", text: "Noise pollution" },
+          { key: "C", text: "Social inequality" },
+          { key: "D", text: "Poor work-life balance" }
+        ],
+        correct: ["B"],
+        explanation: "Continuous loud sounds disrupting sleep and causing stress, hearing, and mental health issues represent noise pollution, which directly affects community quality of life."
+      },
+      {
+        id: "Q36", lo: "LO 2b", type: "single",
+        question: "Coastal communities have noticed a significant decline in local fish populations due to overfishing.\n\nRequirement: Which of the following correctly defines overfishing?",
+        options: [
+          { key: "A", text: "The sustainable and regulated harvesting of fish to maintain population levels" },
+          { key: "B", text: "The practice of catching fish faster than they can reproduce" },
+          { key: "C", text: "The act of fishing in designated protected marine areas" },
+          { key: "D", text: "The use of large fishing nets to capture multiple species of fish at once" }
+        ],
+        correct: ["B"],
+        explanation: "Overfishing is defined as the practice of catching fish faster than they can reproduce, leading to declines in fish populations."
+      },
+      {
+        id: "Q37", lo: "LO 2c", type: "single",
+        question: "The government initiated a rural poverty programme promoting inclusive policies and active community engagement (advisory councils, participatory budgeting, community-driven projects).\n\nRequirement: Which action best represents an inclusive approach to community engagement in poverty alleviation?",
+        options: [
+          { key: "A", text: "Including representatives from marginalised groups in advisory councils" },
+          { key: "B", text: "Providing tax incentives for rural businesses" },
+          { key: "C", text: "Offering grants for agricultural innovation" },
+          { key: "D", text: "Building modern infrastructure for better transportation" }
+        ],
+        correct: ["A"],
+        explanation: "Including representatives from marginalised groups in advisory councils ensures diverse voices are heard and decision-making is more equitable and representative."
+      },
+      {
+        id: "Q38", lo: "LO 2c", type: "single",
+        question: "Shartaur Ltd offers scholarships, fair wages, safe conditions, and a supplier code of conduct, yet faces criticism for not addressing inequality within its workforce demographics.\n\nRequirement: Which additional action should Shartaur take?",
+        options: [
+          { key: "A", text: "Increase the number of scholarships provided to underprivileged students" },
+          { key: "B", text: "Enhance health and safety protocols for employees in high-risk jobs" },
+          { key: "C", text: "Launch a programme to recruit and retain employees from diverse backgrounds" },
+          { key: "D", text: "Expand the supplier code of conduct to include environmental sustainability criteria" }
+        ],
+        correct: ["C"],
+        explanation: "Launching a diversity and inclusion programme focused on recruiting and retaining employees from diverse backgrounds directly addresses workforce demographic inequality."
+      },
+      {
+        id: "Q39", lo: "LO 2c", type: "single",
+        question: "Top1 Tech Ltd noticed declining employee satisfaction and higher turnover; exit interviews show employees from diverse backgrounds feel undervalued.\n\nRequirement: Which action should Top1 take?",
+        options: [
+          { key: "A", text: "Introduce an anonymous suggestion box" },
+          { key: "B", text: "Increase salaries and offer more benefits" },
+          { key: "C", text: "Arrange team-building activities for employees" },
+          { key: "D", text: "Implement a strategy for diversity and inclusion" }
+        ],
+        correct: ["D"],
+        explanation: "A comprehensive diversity and inclusion strategy (training, equitable hiring, employee resource groups) directly addresses the systemic issues of underrepresentation and undervaluing diverse staff."
+      },
+      {
+        id: "Q40", lo: "LO 2c", type: "single",
+        question: "Squest Ltd discovered a supplier uses child labour in unsafe conditions with limited education access. Squest has a strict policy against child labour.\n\nRequirement: Which action should Squest take?",
+        options: [
+          { key: "A", text: "Continue to work with the supplier following an agreement to improve working conditions" },
+          { key: "B", text: "Publicly condemn the supplier and terminate the contract with them" },
+          { key: "C", text: "Terminate the supplier's contract and work with NGOs to support affected children" },
+          { key: "D", text: "Quietly replace the supplier to avoid reputational damage through association" }
+        ],
+        correct: ["C"],
+        explanation: "Terminating the contract eliminates the unethical supplier while working with NGOs supports the welfare needs of the affected children, addressing the root of the problem ethically."
+      },
+      {
+        id: "Q41", lo: "LO 2d", type: "single",
+        question: "Eco Pulse Ltd aims to promote long-term economic growth through sustainable development practices.\n\nRequirement: Which investment directly supports this goal?",
+        options: [
+          { key: "A", text: "Investing in renewable energy sources" },
+          { key: "B", text: "Organising annual company social events" },
+          { key: "C", text: "Expanding the number of senior executives" },
+          { key: "D", text: "Temporarily increasing the marketing budget" }
+        ],
+        correct: ["A"],
+        explanation: "Investing in renewable energy supports long-term economic growth by reducing reliance on non-renewable resources, lowering operational costs over time, and contributing to environmental sustainability."
+      },
+      {
+        id: "Q42", lo: "LO 2e", type: "single",
+        question: "City Skies SpA is exploring strategies for long-term economic growth while ensuring equitable treatment of employees.\n\nRequirement: Which strategy achieves both?",
+        options: [
+          { key: "A", text: "Increase shareholder dividends to attract more investors" },
+          { key: "B", text: "Implement fair wage policies and conduct regular pay reviews" },
+          { key: "C", text: "Invest in advanced technology to boost productivity" },
+          { key: "D", text: "Relocate headquarters to a high-income area to attract top talent" }
+        ],
+        correct: ["B"],
+        explanation: "Fair wage policies and regular pay reviews ensure equitable compensation, leading to higher productivity, job satisfaction, and retention—essential for sustainable economic growth."
+      },
+      {
+        id: "Q43", lo: "LO 2e", type: "single",
+        question: "Fusional Ltd is considering a wage ratio policy (e.g., 20:1) capping the highest-paid executive's salary relative to the lowest-paid employee.\n\nRequirement: What primary impact would this have on Fusional's sustainability goals?",
+        options: [
+          { key: "A", text: "Damage economic sustainability as economic instability would be created by limiting the salary potential of executives" },
+          { key: "B", text: "Damage economic stability due to increased operational costs of administering and monitoring the policy" },
+          { key: "C", text: "Promote economic sustainability by attracting more high-paying executives" },
+          { key: "D", text: "Promote economic and social sustainability by reducing income inequality and promoting fair wages" }
+        ],
+        correct: ["D"],
+        explanation: "A wage ratio policy directly reduces income inequality and promotes fair wages, creating a more equitable environment that improves job satisfaction, lowers turnover, and supports both economic and social sustainability."
+      },
+      {
+        id: "Q44", lo: "LO 2d", type: "single",
+        question: "Innova Ltd encountered a severe economic downturn from a drop in market demand and supply chain disruption, stressing its cash flow.\n\nRequirement: Which strategy would improve Innova's resilience to such economic shocks?",
+        options: [
+          { key: "A", text: "Direct resources towards the more profitable product line" },
+          { key: "B", text: "Increase short-term debt to cover urgent and immediate expenses" },
+          { key: "C", text: "Establish a diversified portfolio of revenue streams" },
+          { key: "D", text: "Halt all marketing activities to save costs" }
+        ],
+        correct: ["C"],
+        explanation: "Diversifying revenue streams reduces reliance on any single income source, spreading risk, enhancing financial resilience, and stabilising cash flow during shocks."
+      },
+      {
+        id: "Q45", lo: "LO 2a", type: "single",
+        question: "Where did the concept of the three pillars of sustainability originate?",
+        options: [
+          { key: "A", text: "Rio Earth Summit in 1992" },
+          { key: "B", text: "Kyoto Protocol in 1997" },
+          { key: "C", text: "Brundtland Report in 1987" },
+          { key: "D", text: "Paris Agreement in 2015" }
+        ],
+        correct: ["C"],
+        explanation: "The Brundtland Report (Our Common Future), published in 1987 by the WCED, introduced sustainable development and highlighted balancing economic, social, and environmental goals."
+      },
+      {
+        id: "Q46", lo: "LO 2d", type: "single",
+        question: "A large city introduced electric buses to replace diesel buses, reducing GHG emissions, creating local manufacturing jobs, and offering affordable, reliable transport.\n\nRequirement: What is the impact on economic sustainability?",
+        options: [
+          { key: "A", text: "Negative impact due to the high costs in implementing the scheme" },
+          { key: "B", text: "Minimal impact due to the improvements in reputation" },
+          { key: "C", text: "Positive impact through the creation of local jobs" },
+          { key: "D", text: "Neutral impact as revenues will remain unchanged as the same number of buses will be run" }
+        ],
+        correct: ["C"],
+        explanation: "The initiative supports economic sustainability by creating local jobs in manufacturing and maintenance, investing in the local economy, and potentially increasing passenger revenue."
+      },
+      {
+        id: "Q47", lo: "LO 2e", type: "single",
+        question: "Which of the following situations illustrates a trade-off between social sustainability and economic sustainability?",
+        options: [
+          { key: "A", text: "A company upgrades its machinery to improve efficiency and lower operational costs" },
+          { key: "B", text: "A business implements a diversity policy that requires significant training and resources" },
+          { key: "C", text: "A corporation increases its production capacity to meet growing demand" },
+          { key: "D", text: "A factory implements energy-efficient technologies to reduce operating expenses" }
+        ],
+        correct: ["B"],
+        explanation: "Implementing a diversity policy invests in social sustainability, creating a short-term trade-off with economic sustainability due to significant training and resource costs."
+      },
+      {
+        id: "Q48", lo: "LO 2c", type: "single",
+        question: "Food security is an important sustainability consideration.\n\nRequirement: To which of the following does the challenge of food security most closely align?",
+        options: [
+          { key: "A", text: "Environmental sustainability" },
+          { key: "B", text: "Social sustainability" },
+          { key: "C", text: "Economic sustainability" },
+          { key: "D", text: "Political sustainability" }
+        ],
+        correct: ["B"],
+        explanation: "Food security aligns primarily with social sustainability because it addresses the basic human need for access to sufficient, safe, and nutritious food, essential for human welfare and social stability."
+      },
+      {
+        id: "Q49", lo: "LO 2b", type: "multi", selectCount: 3,
+        question: "Which three of the following are direct effects of global warming?",
+        options: [
+          { key: "A", text: "Rising sea levels" },
+          { key: "B", text: "Biodiversity loss" },
+          { key: "C", text: "Economic degrowth" },
+          { key: "D", text: "Reduced inequalities" },
+          { key: "E", text: "More extreme droughts and flooding" }
+        ],
+        correct: ["A", "B", "E"],
+        explanation: "Global warming directly causes rising sea levels (melting ice), biodiversity loss (disrupted habitats, coral bleaching), and more extreme droughts and flooding (intensified weather patterns)."
+      },
+      {
+        id: "Q50", lo: "LO 2b", type: "single",
+        question: "Travel by flying makes a large contribution to climate change.\n\nRequirement: Is this statement true or false?",
+        options: [
+          { key: "A", text: "True, because flying is a highly carbon-intensive activity" },
+          { key: "B", text: "True, because flying disrupts the water cycle in the atmosphere" },
+          { key: "C", text: "False, because the flight operator can offset the carbon emissions" },
+          { key: "D", text: "False, because the greenhouse gas emissions are the same for flying as for other modes of transport" }
+        ],
+        correct: ["A"],
+        explanation: "Flying is one of the most carbon-intensive modes of transport, burning large amounts of fossil fuels and emitting GHGs at high altitudes that amplify global warming. Carbon offsetting does not eliminate these emissions."
+      }
+    ];
+
+    // =========================================================================
+    // 2. DAILY REVIEW FLASHCARDS (22 HIGH-YIELD CONCEPTS FROM CHAPTER 2)
+    // =========================================================================
+    const FLASHCARDS = [
+      {
+        id: "FC1", lo: "LO 2a",
+        front: "Triple Bottom Line (3 Ps)",
+        back: "Encourages businesses to focus on three key areas:\n• Profit (Economic)\n• Planet (Environmental)\n• People (Social)",
+        tip: "Nhớ cụm 'Three Ps' — đừng nhầm với Operating profit / Profit before tax."
+      },
+      {
+        id: "FC2", lo: "LO 2a",
+        front: "Origin of the Three Pillars of Sustainability",
+        back: "Originated in the Brundtland Report (Our Common Future) in 1987, published by the World Commission on Environment and Development (WCED).",
+        tip: "Mốc thời gian hay hỏi: Brundtland Report (1987) — không phải Rio 1992 hay Paris 2015."
+      },
+      {
+        id: "FC3", lo: "LO 2d",
+        front: "Long-term Value & Sustainability",
+        back: "Good sustainability practices enhance the value of a business over the longer term by mitigating environmental degradation & social unrest risks while maintaining profitability.",
+        tip: "Kể cả khi mục tiêu là tối đa hóa tài sản cổ đông, vẫn phải áp dụng sustainability."
+      },
+      {
+        id: "FC4", lo: "LO 2b",
+        front: "Ocean Acidification & Economic Impact",
+        back: "• Definition: Ongoing decrease in ocean pH due to absorption of atmospheric CO₂.\n• Economic impact: Weakens calcium carbonate shells -> reduced production of commercially important shellfish.",
+        tip: "Từ khóa: pH decrease + CO₂ absorption + Shellfish production."
+      },
+      {
+        id: "FC5", lo: "LO 2b",
+        front: "Eutrophication & Water Quality",
+        back: "Water pollution introduces harmful substances/nutrients leading to eutrophication -> oxygen depletion (dead zones). Global warming also causes acute rainfall/storms washing brown water & pesticides into lakes.",
+        tip: "2 nguyên nhân chính làm giảm chất lượng nước hồ: Water pollution (oxygen depletion) + Global warming."
+      },
+      {
+        id: "FC6", lo: "LO 2b",
+        front: "Direct Implications of Global Warming",
+        back: "• Rising sea levels (melting ice + thermal expansion)\n• More frequent & severe heatwaves\n• Increased intensity of hurricanes\n• Biodiversity loss & more extreme droughts/flooding",
+        tip: "Loại trừ: Pollution contamination, overexploitation, economic degrowth, reduced inequalities."
+      },
+      {
+        id: "FC7", lo: "LO 2b",
+        front: "Carbon Sinks & Carbon Sequestration",
+        back: "Forests and oceans act as carbon sinks: they absorb MORE carbon dioxide than they release (carbon sequestration), mitigating global warming.",
+        tip: "Solar energy bổ trợ rừng bằng cách giảm phát thải CO₂ từ nhiên liệu hóa thạch, giảm áp lực hấp thụ cho rừng."
+      },
+      {
+        id: "FC8", lo: "LO 2b",
+        front: "Young vs. Mature Forests & Ocean Absorption",
+        back: "• Young growing forests have a HIGHER RATE of carbon sequestration than mature forests (mature forests store more total biomass).\n• Oceans absorb CO₂ mainly via seawater dissolution & PHYTOPLANKTON (not primarily seaweed).",
+        tip: "Bẫy kinh điển ở Q11: Cả 2 nhận định ngược lại đều SAI."
+      },
+      {
+        id: "FC9", lo: "LO 2b",
+        front: "Deforestation: Environmental & Water Cycle Impact",
+        back: "• Leading cause of species decline in tropical rainforests (habitat loss -> biodiversity loss).\n• Water cycle: Compacted soil absorbs less water -> INCREASES surface runoff, soil erosion, flash flooding, and lowers groundwater.",
+        tip: "Phá rừng = tăng surface runoff + tăng lũ lụt + giảm mực nước ngầm."
+      },
+      {
+        id: "FC10", lo: "LO 2d, 2e",
+        front: "Economic Impact of Deforestation",
+        back: "Two-sided impact:\n1. Reduces income from forestry-related activities (logging, rubber tapping).\n2. Increases local employment from other sources (oil palm, soy, cattle grazing).",
+        tip: "Cả hai chiều tác động kinh tế này đều ĐÚNG (Q14)."
+      },
+      {
+        id: "FC11", lo: "LO 2b",
+        front: "Overfishing, Plastic Pollution & Flying",
+        back: "• Overfishing: Catching fish faster than they can reproduce.\n• Plastic pollution: Floating debris islands, marine ingestion/entanglement.\n• Flying: Highly carbon-intensive (high-altitude GHGs); carbon offsetting does NOT eliminate emissions.",
+        tip: "Carbon offset chỉ là biện pháp bổ trợ, không phủ nhận việc bay gây phát thải cao."
+      },
+      {
+        id: "FC12", lo: "LO 2b",
+        front: "Direct vs. Indirect Carbon Neutral Actions",
+        back: "• Direct: Energy-efficient data centres/machinery, renewable energy, developing energy-saving products (reduces Scope 3).\n• Indirect: Donating 1% of sales, carbon offset projects.",
+        tip: "Ưu tiên hành động giảm trực tiếp năng lượng/phát thải hơn là quyên góp hay mua offset."
+      },
+      {
+        id: "FC13", lo: "LO 2c",
+        front: "Noise Pollution (Social Pillar)",
+        back: "Continuous loud sounds from machinery/trucks (especially night shifts) disrupting sleep, causing stress, hearing issues, and mental health problems for nearby residents.",
+        tip: "Nhớ: Noise pollution thuộc nhóm tác động xã hội (LO 2c) ảnh hưởng chất lượng sống cộng đồng."
+      },
+      {
+        id: "FC14", lo: "LO 2c",
+        front: "Poverty Alleviation & Inclusive Engagement",
+        back: "• Direct poverty target: Free healthcare for low-income families (meets basic needs).\n• Inclusive community engagement: Including representatives from marginalised groups in advisory councils.",
+        tip: "Tìm phương án chạm trực tiếp đến 'basic needs' hoặc 'marginalised groups'."
+      },
+      {
+        id: "FC15", lo: "LO 2c",
+        front: "Food Security",
+        back: "Balancing food production for a growing population with sustainable practices. Aligns MOST closely with SOCIAL sustainability (basic human need for safe, nutritious food).",
+        tip: "Bẫy: Dù liên quan môi trường/kinh tế, Food security gắn trực tiếp nhất với Social sustainability."
+      },
+      {
+        id: "FC16", lo: "LO 2c",
+        front: "Employee Wellbeing & Workplace Safety",
+        back: "• Work-life balance decline: Introduce flexible working hours (NOT mandatory team-building or overtime bonuses).\n• Workplace accidents: Improve facilities + thorough safety programme with regular audits & employee training.",
+        tip: "Giải pháp toàn diện luôn nhắm vào nguyên nhân gốc rễ (root causes)."
+      },
+      {
+        id: "FC17", lo: "LO 2c",
+        front: "Diversity & Inclusion (D&I)",
+        back: "• Key outcome: Increased INNOVATION (diverse perspectives & creativity).\n• Common barrier: Unconscious bias during hiring.\n• Fixing demographic inequality/turnover: Comprehensive D&I recruitment & retention strategy.",
+        tip: "D&I -> Increased innovation; Barrier -> Unconscious bias."
+      },
+      {
+        id: "FC18", lo: "LO 2c",
+        front: "Modern Slavery & Child Labour",
+        back: "• Modern slavery indicators: Confiscating workers' passports (restricts freedom) + charging high recruitment fees (debt bondage).\n• Child labour in supply chain: Terminate supplier contract AND work with NGOs to support affected children.",
+        tip: "Đừng chỉ cắt hợp đồng hoặc lặng lẽ đổi nhà cung cấp — phải phối hợp NGO hỗ trợ trẻ em."
+      },
+      {
+        id: "FC19", lo: "LO 2d",
+        front: "Long-term Economic Growth & Resilience",
+        back: "• R&D for innovative technologies (efficiency & competitiveness).\n• Renewable energy (reduces non-renewable reliance & long-term costs).\n• Diversifying revenue streams (spreads risk, builds resilience to economic shocks).",
+        tip: "Tránh các giải pháp ngắn hạn: giảm giá mạnh, cắt đào tạo, vay nợ ngắn hạn, khai thác cạn kiệt."
+      },
+      {
+        id: "FC20", lo: "LO 2e",
+        front: "Living Wage, Profit-Sharing & Wage Ratio Policy",
+        back: "All three enhance BOTH Social & Economic sustainability:\n• Social: Basic needs met, reduced income inequality, fairness.\n• Economic: Higher motivation, productivity, loyalty & lower staff turnover.",
+        tip: "Ba chính sách lương thưởng công bằng này luôn mang lại lợi ích kép: Social + Economic."
+      },
+      {
+        id: "FC21", lo: "LO 2e",
+        front: "Win-Win vs. Trade-offs Across Pillars",
+        back: "• All 3 Pillars: Urban tree-planting employing local residents.\n• Env (-) vs. Soc/Econ (+): Clearing forest to build a factory hiring local workers.\n• Soc (+) vs. Econ (- short-term): Diversity policy requiring significant training/resources.",
+        tip: "Đọc kỹ đề xem đang hỏi 'hỗ trợ cả 3 trụ cột' hay 'trade-off giữa 2 trụ cột nào'."
+      },
+      {
+        id: "FC22", lo: "LO 2e",
+        front: "Recycled Products & Economic Sustainability",
+        back: "Launching a 100% recycled clothing line + staff training has a POTENTIALLY POSITIVE impact on economic sustainability through market differentiation, improved reputation, and changing customer behaviour.",
+        tip: "Không phải 'immediate cost savings' mà là 'market differentiation & changing customer behaviour'."
+      }
+    ];
+
+    // =========================================================================
+    // 3. STATE MANAGEMENT & LOCALSTORAGE
+    // =========================================================================
+    const STORAGE_KEY = "icaew_sustain_c2_state_v1";
+
+    let state = {
+      activeTab: "quiz",
+      quizMode: "practice", // 'practice' | 'exam'
+      cycleNumber: 1,
+      isSubsetCycle: false,
+      order: [], // array of question IDs in current cycle
+      currentIndex: 0,
+      answers: {}, // { [qId]: { selected: [], checked: boolean, isCorrect: boolean } }
+      examGraded: false,
+      flaggedIds: [], // persisted
+      cycleHistory: [], // persisted: [{ cycle, date, mode, total, correct, wrong, errorRate, flagged }]
+      fcStatus: {}, // persisted: { [fcId]: 'mastered' | 'review' }
+      fcOrder: FLASHCARDS.map(f => f.id),
+      fcFilter: "all", // 'all' | 'review'
+      fcIndex: 0,
+      fcFlipped: false
+    };
+
+    function loadPersistedData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const saved = JSON.parse(raw);
+          state.flaggedIds = Array.isArray(saved.flaggedIds) ? saved.flaggedIds : [];
+          state.cycleHistory = Array.isArray(saved.cycleHistory) ? saved.cycleHistory : [];
+          state.fcStatus = saved.fcStatus || {};
+          state.cycleNumber = saved.cycleNumber || 1;
+        }
+      } catch (e) {
+        console.warn("Could not load localStorage:", e);
+      }
+    }
+
+    function savePersistedData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          flaggedIds: state.flaggedIds,
+          cycleHistory: state.cycleHistory,
+          fcStatus: state.fcStatus,
+          cycleNumber: state.cycleNumber
+        }));
+      } catch (e) {
+        console.warn("Could not save localStorage:", e);
+      }
+    }
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function getQuestionById(id) {
+      return QUESTIONS.find(q => q.id === id);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.textContent = msg;
+      toast.classList.remove("hidden");
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        toast.classList.add("hidden");
+      }, 2400);
+    }
+
+    // =========================================================================
+    // 4. NAVIGATION & TABS
+    // =========================================================================
+    function switchTab(tab) {
+      state.activeTab = tab;
+      ["quiz", "flashcards", "review"].forEach(t => {
+        document.getElementById(`view-${t}`).classList.toggle("hidden", t !== tab);
+        const btn = document.getElementById(`tab-${t}`);
+        if (t === tab) {
+          btn.className = "flex-1 sm:flex-none px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-white text-emerald-700 shadow-sm relative";
+        } else {
+          btn.className = "flex-1 sm:flex-none px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-800 relative";
+        }
+      });
+
+      if (tab === "flashcards") renderFlashcard();
+      if (tab === "review") renderReviewTab();
+    }
+
+    function updateFlagBadge() {
+      const badge = document.getElementById("flag-count-badge");
+      if (state.flaggedIds.length > 0) {
+        badge.textContent = state.flaggedIds.length;
+        badge.classList.remove("hidden");
+      } else {
+        badge.classList.add("hidden");
+      }
+    }
+
+    // =========================================================================
+    // 5. QUIZ CYCLE & MODE LOGIC
+    // =========================================================================
+    function startNewCycle(incrementNumber = true, customIds = null) {
+      closeSummaryModal();
+      if (incrementNumber && !customIds) {
+        state.cycleNumber += 1;
+        savePersistedData();
+      }
+      state.isSubsetCycle = Boolean(customIds);
+      const ids = customIds ? customIds : QUESTIONS.map(q => q.id);
+      state.order = shuffleArray(ids);
+      state.currentIndex = 0;
+      state.answers = {};
+      state.examGraded = false;
+
+      document.getElementById("exam-review-banner").classList.add("hidden");
+      renderQuiz();
+      showToast(customIds
+        ? `Bắt đầu ôn ${ids.length} câu sai & phân vân!`
+        : `Đã xáo trộn chu kỳ #${state.cycleNumber} (${ids.length} câu)`
+      );
+    }
+
+    function setQuizMode(mode) {
+      if (state.quizMode === mode) return;
+      state.quizMode = mode;
+
+      const btnP = document.getElementById("mode-practice");
+      const btnE = document.getElementById("mode-exam");
+      if (mode === "practice") {
+        btnP.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow-sm";
+        btnE.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 hover:text-slate-800";
+      } else {
+        btnE.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow-sm";
+        btnP.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 hover:text-slate-800";
+      }
+
+      state.answers = {};
+      state.examGraded = false;
+      state.currentIndex = 0;
+      document.getElementById("exam-review-banner").classList.add("hidden");
+      renderQuiz();
+      showToast(mode === "practice" ? "Đã chuyển sang chế độ Luyện tập" : "Đã chuyển sang chế độ Kiểm tra");
+    }
+
+    function checkExactMatch(selected, correct) {
+      if (selected.length !== correct.length) return false;
+      const s = [...selected].sort();
+      const c = [...correct].sort();
+      return s.every((val, idx) => val === c[idx]);
+    }
+
+    function selectOption(optionKey) {
+      const qId = state.order[state.currentIndex];
+      const q = getQuestionById(qId);
+      const ans = state.answers[qId] || { selected: [], checked: false, isCorrect: false };
+
+      if ((state.quizMode === "practice" && ans.checked) || (state.quizMode === "exam" && state.examGraded)) {
+        return;
+      }
+
+      if (q.type === "single") {
+        ans.selected = [optionKey];
+        if (state.quizMode === "practice") {
+          ans.checked = true;
+          ans.isCorrect = checkExactMatch(ans.selected, q.correct);
+        }
+      } else {
+        if (ans.selected.includes(optionKey)) {
+          ans.selected = ans.selected.filter(k => k !== optionKey);
+        } else {
+          if (ans.selected.length < q.selectCount) {
+            ans.selected.push(optionKey);
+          } else {
+            showToast(`Câu này chỉ chọn tối đa ${q.selectCount} đáp án.`);
+            return;
+          }
+        }
+      }
+
+      state.answers[qId] = ans;
+      renderQuiz();
+    }
+
+    function submitMultiPractice() {
+      const qId = state.order[state.currentIndex];
+      const q = getQuestionById(qId);
+      const ans = state.answers[qId];
+      if (!ans || ans.selected.length === 0) {
+        showToast(`Hãy chọn ${q.selectCount} đáp án trước khi kiểm tra.`);
+        return;
+      }
+      ans.checked = true;
+      ans.isCorrect = checkExactMatch(ans.selected, q.correct);
+      state.answers[qId] = ans;
+      renderQuiz();
+    }
+
+    function toggleFlagCurrent() {
+      const qId = state.order[state.currentIndex];
+      if (state.flaggedIds.includes(qId)) {
+        state.flaggedIds = state.flaggedIds.filter(id => id !== qId);
+        showToast(`Đã bỏ đánh dấu ${qId}`);
+      } else {
+        state.flaggedIds.push(qId);
+        showToast(`Đã đánh dấu ${qId} (Phân vân / Chọn lụi)`);
+      }
+      savePersistedData();
+      updateFlagBadge();
+      renderQuiz();
+    }
+
+    function prevQuestion() {
+      if (state.currentIndex > 0) {
+        state.currentIndex--;
+        renderQuiz();
+      }
+    }
+
+    function nextQuestion() {
+      if (state.currentIndex < state.order.length - 1) {
+        state.currentIndex++;
+        renderQuiz();
+      } else {
+        finishCycle();
+      }
+    }
+
+    function jumpToQuestion(idx) {
+      state.currentIndex = idx;
+      renderQuiz();
+    }
+
+    function toggleNavigator() {
+      const nav = document.getElementById("question-navigator");
+      const label = document.getElementById("nav-toggle-label");
+      const isHidden = nav.classList.toggle("hidden");
+      label.textContent = isHidden ? "Hiện danh sách câu hỏi" : "Ẩn danh sách câu hỏi";
+    }
+
+    function finishCycle() {
+      const total = state.order.length;
+      let correctCount = 0;
+      let wrongCount = 0;
+      let flaggedInCycle = 0;
+
+      state.order.forEach(qId => {
+        const q = getQuestionById(qId);
+        const ans = state.answers[qId] || { selected: [], checked: false, isCorrect: false };
+        ans.checked = true;
+        ans.isCorrect = checkExactMatch(ans.selected, q.correct);
+        state.answers[qId] = ans;
+
+        if (ans.isCorrect) correctCount++;
+        else wrongCount++;
+
+        if (state.flaggedIds.includes(qId)) flaggedInCycle++;
+      });
+
+      state.examGraded = true;
+      const accuracyRate = Math.round((correctCount / total) * 100);
+      const errorRate = Math.round((wrongCount / total) * 100);
+
+      state.cycleHistory.unshift({
+        cycle: state.isSubsetCycle ? `Ôn tập (${total} câu)` : `Chu kỳ #${state.cycleNumber}`,
+        date: new Date().toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }),
+        mode: state.quizMode === "practice" ? "Luyện tập" : "Kiểm tra",
+        total,
+        correct: correctCount,
+        wrong: wrongCount,
+        errorRate,
+        flagged: flaggedInCycle
+      });
+      if (state.cycleHistory.length > 20) state.cycleHistory.pop();
+      savePersistedData();
+
+      document.getElementById("modal-cycle-subtitle").textContent =
+        `${state.isSubsetCycle ? "Phiên ôn câu yếu" : "Chu kỳ #" + state.cycleNumber} • Chế độ ${state.quizMode === "practice" ? "Luyện tập" : "Kiểm tra"} (${total} câu)`;
+      document.getElementById("modal-correct").textContent = `${correctCount}/${total} (${accuracyRate}%)`;
+      document.getElementById("modal-wrong").textContent = wrongCount;
+      document.getElementById("modal-error-rate").textContent = `${errorRate}%`;
+      document.getElementById("modal-flagged").textContent = flaggedInCycle;
+
+      const weakCount = getWeakIdsInCurrentCycle().length;
+      const weakBtn = document.getElementById("modal-btn-review-weak");
+      if (weakCount > 0) {
+        weakBtn.classList.remove("hidden");
+        weakBtn.textContent = `Ôn lại ${weakCount} câu sai & phân vân`;
+      } else {
+        weakBtn.classList.add("hidden");
+      }
+
+      if (state.quizMode === "exam") {
+        document.getElementById("exam-review-banner").classList.remove("hidden");
+        document.getElementById("exam-review-stats").textContent =
+          `Đúng ${correctCount}/${total} câu (${accuracyRate}%) • Tỷ lệ sai: ${errorRate}% • Bạn có thể bấm từng câu để xem giải thích chi tiết.`;
+      }
+
+      renderQuiz();
+      openSummaryModal();
+    }
+
+    function getWeakIdsInCurrentCycle() {
+      const set = new Set();
+      state.order.forEach(qId => {
+        const ans = state.answers[qId];
+        if (!ans || !ans.isCorrect) set.add(qId);
+        if (state.flaggedIds.includes(qId)) set.add(qId);
+      });
+      return Array.from(set);
+    }
+
+    function startWeakCycleFromModal() {
+      const weakIds = getWeakIdsInCurrentCycle();
+      if (weakIds.length === 0) {
+        showToast("Tuyệt vời! Không có câu sai hay phân vân nào.");
+        closeSummaryModal();
+        return;
+      }
+      startNewCycle(false, weakIds);
+    }
+
+    function openSummaryModal() {
+      document.getElementById("summary-modal").classList.remove("hidden");
+    }
+
+    function closeSummaryModal() {
+      document.getElementById("summary-modal").classList.add("hidden");
+    }
+
+    // =========================================================================
+    // 6. RENDER QUIZ CAROUSEL
+    // =========================================================================
+    function renderQuiz() {
+      const total = state.order.length;
+      const qId = state.order[state.currentIndex];
+      const q = getQuestionById(qId);
+      const ans = state.answers[qId] || { selected: [], checked: false, isCorrect: false };
+      const isFlagged = state.flaggedIds.includes(qId);
+      const showFeedback = (state.quizMode === "practice" && ans.checked) || (state.quizMode === "exam" && state.examGraded);
+
+      document.getElementById("cycle-badge").textContent = state.isSubsetCycle
+        ? `Ôn câu yếu (${total} câu)`
+        : `Chu kỳ #${state.cycleNumber} (${total} câu)`;
+
+      const btnSubmitExam = document.getElementById("btn-submit-exam");
+      if (state.quizMode === "exam" && !state.examGraded) {
+        btnSubmitExam.classList.remove("hidden");
+      } else {
+        btnSubmitExam.classList.add("hidden");
+      }
+
+      // Progress & Live Error Rate
+      const answeredIds = state.order.filter(id => {
+        const a = state.answers[id];
+        if (!a) return false;
+        return state.quizMode === "practice" ? a.checked : a.selected.length > 0;
+      });
+      const answeredCount = answeredIds.length;
+      const pct = Math.round((answeredCount / total) * 100);
+      document.getElementById("progress-text").textContent = `${answeredCount}/${total} câu (${pct}%)`;
+      document.getElementById("progress-bar").style.width = `${pct}%`;
+
+      const liveErrorBadge = document.getElementById("live-error-badge");
+      if ((state.quizMode === "practice" && answeredCount > 0) || state.examGraded) {
+        const checkedIds = state.order.filter(id => state.answers[id]?.checked);
+        const wrongSoFar = checkedIds.filter(id => !state.answers[id].isCorrect).length;
+        const errPct = checkedIds.length > 0 ? Math.round((wrongSoFar / checkedIds.length) * 100) : 0;
+        liveErrorBadge.textContent = `Tỷ lệ sai: ${errPct}% (${wrongSoFar}/${checkedIds.length})`;
+        liveErrorBadge.classList.remove("hidden");
+      } else {
+        liveErrorBadge.classList.add("hidden");
+      }
+
+      // Card Header Meta
+      document.getElementById("q-position").textContent = `Câu ${state.currentIndex + 1} / ${total}`;
+      document.getElementById("q-original-id").textContent = q.id;
+      document.getElementById("q-lo-badge").textContent = q.lo;
+
+      const multiBadge = document.getElementById("q-multi-badge");
+      if (q.type === "multi") {
+        multiBadge.textContent = `Chọn ${q.selectCount} đáp án`;
+        multiBadge.classList.remove("hidden");
+      } else {
+        multiBadge.classList.add("hidden");
+      }
+
+      // Flag Button State
+      const btnFlag = document.getElementById("btn-flag");
+      const btnFlagText = document.getElementById("btn-flag-text");
+      if (isFlagged) {
+        btnFlag.className = "flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border text-xs font-semibold transition-all bg-amber-100 border-amber-300 text-amber-800";
+        btnFlagText.textContent = "Đã đánh dấu phân vân";
+      } else {
+        btnFlag.className = "flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border text-xs font-semibold transition-all bg-white border-slate-200 text-slate-600 hover:bg-slate-50";
+        btnFlagText.textContent = "Phân vân / Chọn lụi";
+      }
+
+      // Question Text
+      document.getElementById("q-text").textContent = q.question;
+
+      // Options
+      const optionsContainer = document.getElementById("q-options");
+      optionsContainer.innerHTML = "";
+      q.options.forEach(opt => {
+        const isSelected = ans.selected.includes(opt.key);
+        const isCorrectOpt = q.correct.includes(opt.key);
+
+        let classes = "w-full text-left p-3.5 sm:p-4 rounded-2xl border-2 transition-all flex items-start gap-3 ";
+        let badgeClasses = "w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ";
+
+        if (showFeedback) {
+          if (isCorrectOpt) {
+            classes += "bg-emerald-50 border-emerald-500 text-emerald-950";
+            badgeClasses += "bg-emerald-600 text-white";
+          } else if (isSelected && !isCorrectOpt) {
+            classes += "bg-rose-50 border-rose-400 text-rose-950";
+            badgeClasses += "bg-rose-500 text-white";
+          } else {
+            classes += "bg-slate-50/60 border-slate-100 text-slate-400";
+            badgeClasses += "bg-slate-200 text-slate-500";
+          }
+        } else {
+          if (isSelected) {
+            classes += "bg-teal-50 border-teal-500 text-teal-950 shadow-xs";
+            badgeClasses += "bg-teal-600 text-white";
+          } else {
+            classes += "bg-white border-slate-200 hover:border-teal-300 hover:bg-slate-50 text-slate-700";
+            badgeClasses += "bg-slate-100 text-slate-600";
+          }
+        }
+
+        const btn = document.createElement("button");
+        btn.className = classes;
+        btn.onclick = () => selectOption(opt.key);
+        btn.innerHTML = `
+          <span class="${badgeClasses}">${opt.key}</span>
+          <span class="text-sm sm:text-base leading-snug font-medium flex-1">${opt.text}</span>
+          ${showFeedback && isCorrectOpt ? '<span class="text-emerald-600 font-bold text-sm shrink-0">✓</span>' : ''}
+          ${showFeedback && isSelected && !isCorrectOpt ? '<span class="text-rose-500 font-bold text-sm shrink-0">✕</span>' : ''}
+        `;
+        optionsContainer.appendChild(btn);
+      });
+
+      // Multi-choice Check Button
+      const multiWrap = document.getElementById("multi-check-wrap");
+      if (q.type === "multi" && state.quizMode === "practice" && !ans.checked) {
+        multiWrap.classList.remove("hidden");
+      } else {
+        multiWrap.classList.add("hidden");
+      }
+
+      // Explanation Box
+      const expBox = document.getElementById("explanation-box");
+      if (showFeedback) {
+        expBox.classList.remove("hidden");
+        const statusBadge = document.getElementById("exp-status-badge");
+        if (ans.isCorrect) {
+          expBox.className = "mt-6 p-4 sm:p-5 rounded-2xl border bg-emerald-50/70 border-emerald-200";
+          statusBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-600 text-white";
+          statusBadge.textContent = "Chính xác!";
+        } else {
+          expBox.className = "mt-6 p-4 sm:p-5 rounded-2xl border bg-rose-50/70 border-rose-200";
+          statusBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-600 text-white";
+          statusBadge.textContent = "Chưa đúng";
+        }
+        document.getElementById("exp-correct-answer").textContent = `Đáp án đúng: ${q.correct.join(", ")} (${q.lo})`;
+        document.getElementById("exp-text").textContent = q.explanation;
+      } else {
+        expBox.classList.add("hidden");
+      }
+
+      // Prev / Next Buttons
+      document.getElementById("btn-prev").disabled = state.currentIndex === 0;
+      const btnNext = document.getElementById("btn-next");
+      if (state.currentIndex === total - 1) {
+        btnNext.textContent = state.examGraded ? "Xem tổng kết" : "Hoàn thành chu kỳ ✓";
+      } else {
+        btnNext.textContent = "Câu tiếp →";
+      }
+
+      // Render Question Navigator Grid
+      const navGrid = document.getElementById("nav-grid");
+      navGrid.innerHTML = "";
+      state.order.forEach((id, idx) => {
+        const a = state.answers[id];
+        const flagged = state.flaggedIds.includes(id);
+        let dotClass = "h-8 rounded-lg text-xs font-bold transition-all relative flex items-center justify-center border ";
+
+        if (idx === state.currentIndex) {
+          dotClass += "ring-2 ring-slate-800 ring-offset-1 ";
+        }
+
+        if (a && (state.quizMode === "practice" ? a.checked : state.examGraded)) {
+          dotClass += a.isCorrect
+            ? "bg-emerald-500 text-white border-emerald-600"
+            : "bg-rose-500 text-white border-rose-600";
+        } else if (a && a.selected.length > 0) {
+          dotClass += "bg-teal-500 text-white border-teal-600";
+        } else {
+          dotClass += "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100";
+        }
+
+        const btn = document.createElement("button");
+        btn.className = dotClass;
+        btn.onclick = () => jumpToQuestion(idx);
+        btn.innerHTML = `${idx + 1}${flagged ? '<span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 border border-white"></span>' : ''}`;
+        navGrid.appendChild(btn);
+      });
+    }
+
+    // =========================================================================
+    // 7. FLASHCARDS LOGIC
+    // =========================================================================
+    function getActiveFlashcardList() {
+      if (state.fcFilter === "review") {
+        return state.fcOrder.filter(id => state.fcStatus[id] !== "mastered");
+      }
+      return state.fcOrder;
+    }
+
+    function setFlashcardFilter(filter) {
+      state.fcFilter = filter;
+      state.fcIndex = 0;
+      state.fcFlipped = false;
+
+      const btnAll = document.getElementById("fc-filter-all");
+      const btnRev = document.getElementById("fc-filter-review");
+      if (filter === "all") {
+        btnAll.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-emerald-700 shadow-sm";
+        btnRev.className = "px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600";
+      } else {
+        btnRev.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-emerald-700 shadow-sm";
+        btnAll.className = "px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600";
+      }
+      renderFlashcard();
+    }
+
+    function shuffleFlashcards() {
+      state.fcOrder = shuffleArray(state.fcOrder);
+      state.fcIndex = 0;
+      state.fcFlipped = false;
+      renderFlashcard();
+      showToast("Đã xáo trộn bộ Flashcards!");
+    }
+
+    function flipFlashcard() {
+      state.fcFlipped = !state.fcFlipped;
+      document.getElementById("fc-card").classList.toggle("rotate-y-180", state.fcFlipped);
+    }
+
+    function markFlashcard(status) {
+      const list = getActiveFlashcardList();
+      if (list.length === 0) return;
+      const fcId = list[state.fcIndex];
+      state.fcStatus[fcId] = status;
+      savePersistedData();
+
+      showToast(status === "mastered" ? "Đã đánh dấu: Đã nhớ ✓" : "Đã đánh dấu: Cần ôn lại");
+      state.fcFlipped = false;
+      const newList = getActiveFlashcardList();
+      if (state.fcIndex >= newList.length) state.fcIndex = Math.max(0, newList.length - 1);
+      else if (state.fcFilter === "all" && state.fcIndex < newList.length - 1) state.fcIndex++;
+      renderFlashcard();
+    }
+
+    function prevFlashcard() {
+      const list = getActiveFlashcardList();
+      if (list.length === 0) return;
+      state.fcIndex = (state.fcIndex - 1 + list.length) % list.length;
+      state.fcFlipped = false;
+      renderFlashcard();
+    }
+
+    function nextFlashcard() {
+      const list = getActiveFlashcardList();
+      if (list.length === 0) return;
+      state.fcIndex = (state.fcIndex + 1) % list.length;
+      state.fcFlipped = false;
+      renderFlashcard();
+    }
+
+    function renderFlashcard() {
+      const totalAll = FLASHCARDS.length;
+      const masteredCount = FLASHCARDS.filter(f => state.fcStatus[f.id] === "mastered").length;
+      const reviewCount = totalAll - masteredCount;
+
+      document.getElementById("fc-total-count").textContent = totalAll;
+      document.getElementById("fc-review-count").textContent = reviewCount;
+      document.getElementById("fc-mastered-stats").textContent = `Đã nhớ: ${masteredCount} / ${totalAll}`;
+
+      const list = getActiveFlashcardList();
+      const cardEl = document.getElementById("fc-card");
+      cardEl.classList.toggle("rotate-y-180", state.fcFlipped);
+
+      if (list.length === 0) {
+        document.getElementById("fc-position").textContent = "0 / 0";
+        document.getElementById("fc-front-tag").textContent = "Hoàn tất";
+        document.getElementById("fc-status-pill").textContent = "100% Đã nhớ";
+        document.getElementById("fc-front-text").textContent = "Tuyệt vời! Bạn đã nhớ hết tất cả Flashcards Chương 2.";
+        document.getElementById("fc-back-text").textContent = "Chuyển sang tab 'Tất cả' nếu bạn muốn ôn lại từ đầu.";
+        document.getElementById("fc-back-tip").textContent = "";
+        return;
+      }
+
+      if (state.fcIndex >= list.length) state.fcIndex = 0;
+      const fc = FLASHCARDS.find(f => f.id === list[state.fcIndex]);
+      const status = state.fcStatus[fc.id];
+
+      document.getElementById("fc-position").textContent = `Thẻ ${state.fcIndex + 1} / ${list.length}`;
+      document.getElementById("fc-front-tag").textContent = fc.lo;
+      document.getElementById("fc-back-tag").textContent = fc.id;
+      document.getElementById("fc-front-text").textContent = fc.front;
+      document.getElementById("fc-back-text").textContent = fc.back;
+      document.getElementById("fc-back-tip").textContent = fc.tip;
+
+      const pill = document.getElementById("fc-status-pill");
+      if (status === "mastered") {
+        pill.className = "px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700";
+        pill.textContent = "✓ Đã nhớ";
+      } else if (status === "review") {
+        pill.className = "px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800";
+        pill.textContent = "Cần ôn lại";
+      } else {
+        pill.className = "px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-500";
+        pill.textContent = "Chưa đánh giá";
+      }
+    }
+
+    // =========================================================================
+    // 8. REVIEW & STATS TAB
+    // =========================================================================
+    function renderReviewTab() {
+      const masteredCount = FLASHCARDS.filter(f => state.fcStatus[f.id] === "mastered").length;
+      document.getElementById("stat-cycles").textContent = state.cycleHistory.length;
+      document.getElementById("stat-last-error").textContent =
+        state.cycleHistory.length > 0 ? `${state.cycleHistory[0].errorRate}%` : "--%";
+      document.getElementById("stat-flagged").textContent = state.flaggedIds.length;
+      document.getElementById("stat-fc-mastered").textContent = `${masteredCount}/${FLASHCARDS.length}`;
+
+      const btnPracticeFlagged = document.getElementById("btn-practice-flagged");
+      btnPracticeFlagged.disabled = state.flaggedIds.length === 0;
+
+      const flaggedContainer = document.getElementById("flagged-list");
+      if (state.flaggedIds.length === 0) {
+        flaggedContainer.innerHTML = `<p class="text-sm text-slate-400 italic py-4 text-center">Chưa có câu nào được đánh dấu phân vân.</p>`;
+      } else {
+        flaggedContainer.innerHTML = state.flaggedIds.map(id => {
+          const q = getQuestionById(id);
+          return `
+            <div class="p-4 rounded-2xl border border-amber-200 bg-amber-50/40 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded-md bg-slate-800 text-white text-[11px] font-bold">${q.id}</span>
+                  <span class="px-2 py-0.5 rounded-md bg-teal-50 text-teal-700 text-[11px] font-semibold">${q.lo}</span>
+                  <span class="text-xs font-bold text-emerald-700">Đáp án: ${q.correct.join(", ")}</span>
+                </div>
+                <p class="text-sm font-semibold text-slate-800">${q.question.split('\n')[0]}</p>
+                <p class="text-xs text-slate-600 leading-relaxed">${q.explanation}</p>
+              </div>
+              <button onclick="unflagFromReview('${q.id}')" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-xs font-semibold text-slate-600 shrink-0">
+                Bỏ đánh dấu
+              </button>
+            </div>
+          `;
+        }).join("");
+      }
+
+      const historyContainer = document.getElementById("history-list");
+      if (state.cycleHistory.length === 0) {
+        historyContainer.innerHTML = `<p class="text-sm text-slate-400 italic py-4 text-center">Chưa có chu kỳ nào hoàn thành. Hãy hoàn thành 1 chu kỳ để xem tỷ lệ sai!</p>`;
+      } else {
+        historyContainer.innerHTML = `
+          <table class="w-full text-left border-collapse text-xs sm:text-sm">
+            <thead>
+              <tr class="border-b border-slate-200 text-slate-500">
+                <th class="py-2.5 pr-3 font-semibold">Chu kỳ</th>
+                <th class="py-2.5 px-3 font-semibold">Thời gian</th>
+                <th class="py-2.5 px-3 font-semibold">Chế độ</th>
+                <th class="py-2.5 px-3 font-semibold">Đúng / Tổng</th>
+                <th class="py-2.5 px-3 font-semibold">Tỷ lệ sai</th>
+                <th class="py-2.5 pl-3 font-semibold">Phân vân</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              ${state.cycleHistory.map(h => `
+                <tr>
+                  <td class="py-2.5 pr-3 font-bold text-slate-800">${h.cycle}</td>
+                  <td class="py-2.5 px-3 text-slate-500">${h.date}</td>
+                  <td class="py-2.5 px-3 text-slate-600">${h.mode}</td>
+                  <td class="py-2.5 px-3 font-semibold text-emerald-700">${h.correct}/${h.total}</td>
+                  <td class="py-2.5 px-3 font-bold ${h.errorRate > 25 ? 'text-rose-600' : 'text-emerald-600'}">${h.errorRate}%</td>
+                  <td class="py-2.5 pl-3 text-amber-700 font-semibold">${h.flagged}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        `;
+      }
+    }
+
+    function unflagFromReview(qId) {
+      state.flaggedIds = state.flaggedIds.filter(id => id !== qId);
+      savePersistedData();
+      updateFlagBadge();
+      renderReviewTab();
+      renderQuiz();
+    }
+
+    function startFlaggedOnlyCycle() {
+      if (state.flaggedIds.length === 0) return;
+      switchTab("quiz");
+      startNewCycle(false, [...state.flaggedIds]);
+    }
+
+    function showResetConfirm() {
+      document.getElementById("reset-confirm-area").innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-600">Chắc chắn xóa?</span>
+          <button onclick="confirmResetAll()" class="px-2.5 py-1 rounded-lg bg-rose-600 text-white text-xs font-semibold">Xóa</button>
+          <button onclick="cancelResetAll()" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-semibold">Hủy</button>
+        </div>
+      `;
+    }
+
+    function cancelResetAll() {
+      document.getElementById("reset-confirm-area").innerHTML = `
+        <button onclick="showResetConfirm()" class="text-xs font-semibold text-rose-600 hover:text-rose-800 underline">
+          Xóa toàn bộ dữ liệu
+        </button>
+      `;
+    }
+
+    function confirmResetAll() {
+      localStorage.removeItem(STORAGE_KEY);
+      state.flaggedIds = [];
+      state.cycleHistory = [];
+      state.fcStatus = {};
+      state.cycleNumber = 1;
+      cancelResetAll();
+      updateFlagBadge();
+      renderReviewTab();
+      startNewCycle(false);
+      showToast("Đã đặt lại toàn bộ dữ liệu ôn tập.");
+    }
+
+    // =========================================================================
+    // 9. KEYBOARD SHORTCUTS & INIT
+    // =========================================================================
+    document.addEventListener("keydown", (e) => {
+      if (state.activeTab === "quiz" && document.getElementById("summary-modal").classList.contains("hidden")) {
+        if (e.key === "ArrowLeft") prevQuestion();
+        if (e.key === "ArrowRight") nextQuestion();
+      } else if (state.activeTab === "flashcards") {
+        if (e.code === "Space") {
+          e.preventDefault();
+          flipFlashcard();
+        } else if (e.key === "ArrowLeft") {
+          prevFlashcard();
+        } else if (e.key === "ArrowRight") {
+          nextFlashcard();
+        }
+      }
+    });
+
+    // Initialize Application
+    loadPersistedData();
+    updateFlagBadge();
+    state.order = shuffleArray(QUESTIONS.map(q => q.id));
+    renderQuiz();
+  </script>
+</body>
+</html>
